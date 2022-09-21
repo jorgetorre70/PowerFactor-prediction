@@ -1,5 +1,5 @@
-streamlit==
-pandas==
-altair==
-numpy==
-scikit-learn==
+streamlit==1.12.2
+pandas==1.5.0
+altair==4.2.0
+numpy==1.23.3
+scikit-learn==1.1.2
