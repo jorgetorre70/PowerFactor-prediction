@@ -11,10 +11,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 st.write("""
-# App para predicción del Factor de Potencia
-Esta es una aplicación para la predicción de las variaciones del factor de potencia en sistemas trifásicos
+# Power factor prediction App for three phase systems
+This app can predict the power factor variations in three phase installations thus giving important information about the presence of non linear or
+strongly inductive loads.
 """)
-st.sidebar.header('Introduzca los datos a analizar')
+st.sidebar.header('Please input data for analysis')
 
 # st.sidebar.markdown("""
 # [Cargar el archivo de ejemplo](https://raw.githubusercontent.com/jorgetorre70/PowerFactor-prediction/main/ALSA_correlation.csv)
@@ -23,7 +24,7 @@ st.sidebar.header('Introduzca los datos a analizar')
 # Collects user input features into dataframe
 
 
-uploaded_file = st.sidebar.file_uploader("Cargue su archivo en formato CSV", type=["csv"])
+uploaded_file = st.sidebar.file_uploader("Your file should be in CSV format", type=["csv"])
 if uploaded_file is not None:
     input_df = pd.read_csv(uploaded_file)
 else:
@@ -34,12 +35,12 @@ else:
     input_df = load_data()
 
 # Displays the user input features
-st.subheader('Características del usuario')
+st.subheader('User features')
 
 if uploaded_file is not None:
     st.write(input_df)
 else:
-    st.write('Esperando la carga del archivo CSV. Sus archivos deberán tener el formato que se muestra en el siguiente ejemplo:')
+    st.write('Please notice that your CSV file should have only 3 columns (one for each of the 3 phase currents) according the following example:')
     st.write(input_df)
 
 #Scaling data
@@ -51,9 +52,9 @@ df_unscaled = input_df.iloc[:, 0:3]
 load_RFmodel = pickle.load(open('RFmodel.pkl', 'rb'))
 
 # Apply model to make predictions
-st.subheader('Predicción')
+st.subheader('Prediction')
 
-st.subheader('Métricas del modelo')
+st.subheader('Model metrics')
 y_real = input_df.iloc[:, [3]].values
 y_predict = load_RFmodel.predict(input_df.iloc[:, 0:3])
 
@@ -61,7 +62,7 @@ MAE_result = mean_absolute_error(y_real,y_predict)
 MSE_result = mean_squared_error(y_real,y_predict)
 RMSE_result = round(np.sqrt(MSE_result),3)
 R2score_result = round(r2_score(y_pred=y_predict,y_true=y_real),2)
-datos = {'Modelo Random Forest':[MAE_result,MSE_result, RMSE_result]}
+datos = {'Random Forest Model':[MAE_result,MSE_result, RMSE_result]}
 df = pd.DataFrame(data=datos, index=pd.Index(['MAE','MSE','RMSE']))
 
 st.write(df)
@@ -71,21 +72,21 @@ st.write(df)
 # dfgraf['real'] = input_df['PF'].copy()
 # dfgraf['pred'] = pd.Series(prediction)
 
-st.subheader('Gráfica')
+st.subheader('Plot')
 
-my_labels = {"x1" : "Valores medidos", "x2" : "Valores estimados"}
+my_labels = {"x1" : "Actual values", "x2" : "Predicted values"}
 
 xgraf1 = np.linspace(0,9985,1997)
 fig = plt.figure(figsize=(10,5), dpi=100)
-fig.suptitle('Predicción con modelo RF', fontsize=16)
+fig.suptitle('Prediction using RF model', fontsize=16)
 graficar = pd.DataFrame(data=xgraf1, columns=['index'])
 graficar['PF'] = input_df['PF']
 graficar['predict'] = pd.Series(y_predict)
-sns.lineplot(x=xgraf1,y=graficar.PF,color='b',linewidth = 0.9,label = my_labels["x1"]).set( xlabel = "tiempo(mins)", ylabel = "Factor de potencia")
+sns.lineplot(x=xgraf1,y=graficar.PF,color='b',linewidth = 0.9,label = my_labels["x1"]).set( xlabel = "time(mins)", ylabel = "Power Factor")
 sns.lineplot(x=xgraf1,y=(graficar.predict),color='r',linewidth = 0.9,label = my_labels["x2"])
 plt.legend(loc='upper right')
 plt.xlim(0)
 plt.tight_layout()
 st.pyplot(fig)
 
-st.caption('**D.R. Jorge de la Torre y Ramos - 2022**')
+st.caption('**© Jorge de la Torre y Ramos - 2022**')
